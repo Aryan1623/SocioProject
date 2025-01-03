@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Langflow Interaction</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6e7dff, #778bfa);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        form {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            animation: slideUp 1s ease-out;
+        }
+
+        label {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            margin-right: 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #e0e0e0;
+            font-size: 1rem;
+            color: #333;
+            transition: 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            background-color: #fff;
+            border: 2px solid #6e7dff;
+            outline: none;
+        }
+
+        button {
+            background-color: #6e7dff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #778bfa;
+            transform: scale(1.05);
+        }
+
+        #output {
+            margin-top: 30px;
+            font-weight: bold;
+            color: #fff;
+            font-size: 1.2rem;
+            transition: opacity 0.3s ease;
+        }
+
+        #output.success {
+            color: #76c7c0;
+        }
+
+        #output.error {
+            color: #f76c6c;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Langflow Interaction</h1>
+        <form onsubmit="submitForm(event)">
+            <label for="input_value">Input:</label>
+            <input type="text" id="input_value" name="input_value" placeholder="Enter your input" required>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="output" style="visibility: hidden;"></div>
+    </div>
+
+    <script>
+        function getCsrfToken() {
+            // Retrieve CSRF token from the cookie
+            const csrfToken = document.cookie
+                .split("; ")
+                .find(row => row.startsWith("csrftoken="))
+                ?.split("=")[1];
+            return csrfToken || "";
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+
+            // Clear any previous output and show processing text
+            const outputDiv = document.getElementById("output");
+            outputDiv.style.visibility = "visible";
+            outputDiv.innerText = "Processing...";
+            outputDiv.classList.remove('success', 'error');
+
+            const inputField = document.getElementById("input_value");
+            const input_value = inputField.value;
+
+            // Get CSRF token
+            const csrfToken = getCsrfToken();
+
+            fetch("/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken // Add CSRF token to headers
+                },
+                body: JSON.stringify({ input_value })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.output) {
+                    outputDiv.classList.add('success');
+                    outputDiv.innerHTML = `<strong>Output:</strong> ${data.output}`;
+                } else if (data.error) {
+                    outputDiv.classList.add('error');
+                    outputDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
+                } else {
+                    outputDiv.classList.add('error');
+                    outputDiv.innerHTML = `<strong>Error:</strong> Unknown error occurred`;
+                }
+            })
+            .catch(error => {
+                outputDiv.classList.add('error');
+                outputDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                console.error("Error:", error);
+            });
+        }
+    </script>
+</body>
+</html>
+
+
