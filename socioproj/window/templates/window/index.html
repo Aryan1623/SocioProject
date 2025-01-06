@@ -4,19 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    rel="stylesheet"
+  />
     <title>AI Assistant</title>
     <style>
-        *{
-            margin:0;
-            padding:0;
+        * {
+            margin: 0;
+            padding: 0;
         }
+    
         body {
             font-family: 'Arial', sans-serif;
             background-color: #51e2f5;
             color: #f0f0f0;
             margin: 0;
             padding-top: 27px;
-            
+    
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -24,25 +29,35 @@
             height: 100vh;
             text-align: center;
         }
-
+    
         h1 {
             font-size: 2.5rem;
             margin-bottom: 20px;
             animation: fadeIn 1s ease-in-out;
         }
-
+    
         h1 span {
             background: linear-gradient(90deg, #ff0000, #ff6347);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: gradientText 3s linear infinite;
+            animation: gradientText 3s linear 1 forwards;
         }
-
+    
         @keyframes gradientText {
             0% { background-position: 0%; }
             100% { background-position: 100%; }
         }
-
+    
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+    
+        @keyframes slideUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+    
         form {
             background-color: rgba(50, 50, 50, 0.8);
             border-radius: 10px;
@@ -55,13 +70,13 @@
             flex-direction: column;
             align-items: center;
         }
-
+    
         label {
             font-size: 1.2rem;
             margin-bottom: 10px;
             display: block;
         }
-
+    
         input[type="text"] {
             width: calc(100% - 50px);
             padding: 12px;
@@ -73,19 +88,19 @@
             color: #fff;
             transition: 0.3s ease;
         }
-
+    
         input[type="text"]:focus {
             background-color: #444;
             border: 2px solid #6e7dff;
             outline: none;
         }
-
+    
         .input-container {
             display: flex;
             width: 100%;
             align-items: center;
         }
-
+    
         button {
             background-color: #6e7dff;
             color: white;
@@ -97,12 +112,12 @@
             transition: all 0.3s ease;
             margin-left: 10px;
         }
-
+    
         button:hover {
             background-color: #778bfa;
             transform: scale(1.05);
         }
-
+    
         #output {
             margin-top: 20px;
             font-weight: bold;
@@ -112,31 +127,31 @@
             text-align: left;
             padding-left: 15px;
         }
-
+    
         #output.success {
-            color:#151C44
+            color: #151C44;
         }
-
+    
         #output.error {
             color: #f76c6c;
         }
-
-        #output2{
+    
+        #output2 {
             width: 100vw;
             margin-top: 20px;
-            
         }
-        #output2 img{
-         margin-right: 30px;
-         margin-left: 30px;
-         border-radius: 10px;
-         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    
+        #output2 img {
+            margin-right: 30px;
+            margin-left: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
-        
-
+    
         #spinner {
             display: none;
-            margin: 20px auto;
+            margin-left: 60px;
+            margin-top: 20px;
             border: 4px solid #f3f3f3;
             border-top: 4px solid #6e7dff;
             border-radius: 50%;
@@ -144,7 +159,7 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
-
+    
         .voice-button {
             background-color: white;
             border: none;
@@ -158,40 +173,35 @@
             cursor: pointer;
             transition: transform 0.3s ease;
         }
-
+    
         .voice-button:hover {
             transform: scale(1.1);
         }
-
+    
         .voice-icon {
             font-size: 1.5rem;
             color: #6e7dff;
         }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            0% { transform: translateY(20px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
+    
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
     </style>
+    
+        
 </head>
 <body>
     <div>
-        <h1 id="dynamic-header">Hi, I am your AI <span id="dynamic-role">assistant</span></h1>
+        <h1 id="dynamic-header">Social Media <span id="dynamic-role">assistant</span></h1>
         <form onsubmit="submitForm(event)">
             <div class="input-container">
                 <input type="text" id="input_value" name="input_value" placeholder="Enter your input" required>
                 <button type="button" class="voice-button" onclick="startVoiceRecognition()">
-                    <span class="voice-icon">🎤</span>
+                    <span class="voice-icon">
+                        <i class="fas fa-microphone" style="color: black;"></i>
+                      </span>
+                      
                 </button>
             </div>
             <button type="submit">Submit</button>
@@ -209,110 +219,117 @@
             width: 250px;">
         </div>
 
-    <script>
-        let roles = ["debugger", "assistant"];
-        let roleIndex = 0;
-
-        function changeRole() {
-            const roleElement = document.getElementById("dynamic-role");
-            const words = roles[roleIndex].split("");
-            roleElement.innerHTML = "";
-            words.forEach((char, index) => {
-                const span = document.createElement("span");
-                span.textContent = char;
-                span.style.animation = `fadeIn 0.3s ease ${index * 0.1}s forwards`;
-                span.style.opacity = "0";
-                roleElement.appendChild(span);
-            });
-            roleIndex = (roleIndex + 1) % roles.length;
-        }
-
-        setInterval(changeRole, 2000);
-
-        function getCsrfToken() {
-            const csrfToken = document.cookie
-                .split("; ")
-                .find(row => row.startsWith("csrftoken="))
-                ?.split("=")[1];
-            return csrfToken || "";
-        }
-
-        function submitForm(event) {
-            event.preventDefault();
-
-            const outputDiv = document.getElementById("output");
-            const outputDiv2 = document.getElementById("output2");
-            const spinner = document.getElementById("spinner");
-
-            outputDiv.style.visibility = "hidden";
-            outputDiv2.style.display = "none";
-            spinner.style.display = "block";
-
-            const inputField = document.getElementById("input_value");
-            const input_value = inputField.value;
-            const csrfToken = getCsrfToken();
-
-            fetch("/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken
-                },
-                body: JSON.stringify({ input_value })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                spinner.style.display = "none";
-                outputDiv.style.visibility = "visible";
-                outputDiv2.style.display = "block";
-
-                if (data.output) {
-                    outputDiv.className = 'success';
-                    outputDiv.innerHTML = `${data.output}`;
-                } else if (data.error) {
-                    outputDiv.className = 'error';
-                    outputDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
-                } else {
-                    outputDiv.className = 'error';
-                    outputDiv.innerHTML = `<strong>Error:</strong> Unknown error occurred`;
-                }
-            })
-            .catch(error => {
-                spinner.style.display = "none";
-                outputDiv.style.visibility = "visible";
-                outputDiv.className = 'error';
-                outputDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
-                console.error("Error:", error);
-            });
-        }
-
-        function startVoiceRecognition() {
-            if (!('webkitSpeechRecognition' in window)) {
-                alert("Voice recognition is not supported in this browser.");
-                return;
+        <script>
+            let roles = ["analyser"]; 
+            let roleIndex = 0;
+        
+            function changeRole() {
+                const roleElement = document.getElementById("dynamic-role");
+                const words = roles[roleIndex].split("");
+                roleElement.innerHTML = "";
+                words.forEach((char, index) => {
+                    const span = document.createElement("span");
+                    span.textContent = char;
+                    span.style.animation = `fadeIn 0.3s ease ${index * 0.1}s forwards`;
+                    span.style.opacity = "0";
+                    roleElement.appendChild(span);
+                });
+        
+                // Stop the interval after changing the role
+                clearInterval(roleInterval);
             }
-
-            const recognition = new webkitSpeechRecognition();
-            recognition.lang = "en-US";
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            recognition.start();
-
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById("input_value").value = transcript;
-            };
-
-            recognition.onerror = function(event) {
-                console.error("Voice recognition error:", event);
-            };
-        }
-    </script>
+        
+            // Change the role once after 2 seconds
+            const roleInterval = setInterval(changeRole, 2000);
+        
+            function getCsrfToken() {
+                const csrfToken = document.cookie
+                    .split("; ")
+                    .find(row => row.startsWith("csrftoken="))
+                    ?.split("=")[1];
+                return csrfToken || "";
+            }
+        
+            function submitForm(event) {
+                event.preventDefault();
+        
+                const outputDiv = document.getElementById("output");
+                const outputDiv2 = document.getElementById("output2");
+                const spinner = document.getElementById("spinner");
+        
+                outputDiv.style.visibility = "hidden";
+                outputDiv2.style.display = "none";
+                spinner.style.display = "block";
+        
+                const inputField = document.getElementById("input_value");
+                const input_value = inputField.value;
+                const csrfToken = getCsrfToken();
+        
+                fetch("/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+                    body: JSON.stringify({ input_value })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    spinner.style.display = "none";
+                    outputDiv.style.visibility = "visible";
+                    outputDiv2.style.display = "block";
+        
+                    if (data.output) {
+                        outputDiv.className = 'success';
+                        outputDiv.innerHTML = `${data.output}`;
+                    } else if (data.error) {
+                        outputDiv.className = 'error';
+                        outputDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
+                    } else {
+                        outputDiv.className = 'error';
+                        outputDiv.innerHTML = `<strong>Error:</strong> Unknown error occurred`;
+                    }
+                })
+                .catch(error => {
+                    spinner.style.display = "none";
+                    outputDiv.style.visibility = "visible";
+                    outputDiv.className = 'error';
+                    outputDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                    console.error("Error:", error);
+                });
+            }
+        
+            function startVoiceRecognition() {
+                if (!('webkitSpeechRecognition' in window)) {
+                    alert("Voice recognition is not supported in this browser.");
+                    return;
+                }
+        
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = "en-US";
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+        
+                recognition.start();
+        
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById("input_value").value = transcript;
+                };
+        
+                recognition.onerror = function(event) {
+                    console.error("Voice recognition error:", event);
+                };
+            }
+        </script>
+        
 </body>
 </html>
+
+
+
