@@ -1,17 +1,24 @@
+{%load static%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Langflow Interaction</title>
+    <title>AI Assistant</title>
     <style>
+        *{
+            margin:0;
+            padding:0;
+        }
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #6e7dff, #778bfa);
-            color: #fff;
+            background-color: #51e2f5;
+            color: #f0f0f0;
             margin: 0;
-            padding: 0;
+            padding-top: 27px;
+            
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -24,14 +31,29 @@
             animation: fadeIn 1s ease-in-out;
         }
 
+        h1 span {
+            background: linear-gradient(90deg, #ff0000, #ff6347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientText 3s linear infinite;
+        }
+
+        @keyframes gradientText {
+            0% { background-position: 0%; }
+            100% { background-position: 100%; }
+        }
+
         form {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(50, 50, 50, 0.8);
             border-radius: 10px;
             padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             max-width: 400px;
             width: 100%;
             animation: slideUp 1s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         label {
@@ -41,22 +63,27 @@
         }
 
         input[type="text"] {
-            width: 100%;
+            width: calc(100% - 50px);
             padding: 12px;
             margin-bottom: 20px;
-            margin-right: 20px;
             border: none;
             border-radius: 8px;
-            background-color: #e0e0e0;
+            background-color: #333;
             font-size: 1rem;
-            color: #333;
+            color: #fff;
             transition: 0.3s ease;
         }
 
         input[type="text"]:focus {
-            background-color: #fff;
+            background-color: #444;
             border: 2px solid #6e7dff;
             outline: none;
+        }
+
+        .input-container {
+            display: flex;
+            width: 100%;
+            align-items: center;
         }
 
         button {
@@ -68,6 +95,7 @@
             font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            margin-left: 10px;
         }
 
         button:hover {
@@ -76,19 +104,68 @@
         }
 
         #output {
-            margin-top: 30px;
+            margin-top: 20px;
             font-weight: bold;
-            color: #fff;
             font-size: 1.2rem;
             transition: opacity 0.3s ease;
+            width: 100vw;
+            text-align: left;
+            padding-left: 15px;
         }
 
         #output.success {
-            color: #76c7c0;
+            color:#151C44
         }
 
         #output.error {
             color: #f76c6c;
+        }
+
+        #output2{
+            width: 100vw;
+            margin-top: 20px;
+            
+        }
+        #output2 img{
+         margin-right: 30px;
+         margin-left: 30px;
+         border-radius: 10px;
+         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+
+        #spinner {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6e7dff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        .voice-button {
+            background-color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .voice-button:hover {
+            transform: scale(1.1);
+        }
+
+        .voice-icon {
+            font-size: 1.5rem;
+            color: #6e7dff;
         }
 
         @keyframes fadeIn {
@@ -100,22 +177,59 @@
             0% { transform: translateY(20px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div>
-        <h1>Langflow Interaction</h1>
+        <h1 id="dynamic-header">Hi, I am your AI <span id="dynamic-role">assistant</span></h1>
         <form onsubmit="submitForm(event)">
-            <label for="input_value">Input:</label>
-            <input type="text" id="input_value" name="input_value" placeholder="Enter your input" required>
+            <div class="input-container">
+                <input type="text" id="input_value" name="input_value" placeholder="Enter your input" required>
+                <button type="button" class="voice-button" onclick="startVoiceRecognition()">
+                    <span class="voice-icon">🎤</span>
+                </button>
+            </div>
             <button type="submit">Submit</button>
         </form>
-        <div id="output" style="visibility: hidden;"></div>
+        
     </div>
+    <div id="spinner"></div>
+        <div id="output" style="visibility: hidden;"></div>
+        <div id="output2" style="display:none">
+            <img src="{% static 'images/image.png' %}"  alt="" style="height: 250px;
+            width: 250px;">
+            <img src="{% static 'images/image2.png' %}"  alt="" style="height: 250px;
+            width: 250px;">
+            <img src="{% static 'images/image3.png' %}"  alt="" style="height: 250px;
+            width: 250px;">
+        </div>
 
     <script>
+        let roles = ["debugger", "assistant"];
+        let roleIndex = 0;
+
+        function changeRole() {
+            const roleElement = document.getElementById("dynamic-role");
+            const words = roles[roleIndex].split("");
+            roleElement.innerHTML = "";
+            words.forEach((char, index) => {
+                const span = document.createElement("span");
+                span.textContent = char;
+                span.style.animation = `fadeIn 0.3s ease ${index * 0.1}s forwards`;
+                span.style.opacity = "0";
+                roleElement.appendChild(span);
+            });
+            roleIndex = (roleIndex + 1) % roles.length;
+        }
+
+        setInterval(changeRole, 2000);
+
         function getCsrfToken() {
-            // Retrieve CSRF token from the cookie
             const csrfToken = document.cookie
                 .split("; ")
                 .find(row => row.startsWith("csrftoken="))
@@ -126,23 +240,23 @@
         function submitForm(event) {
             event.preventDefault();
 
-            // Clear any previous output and show processing text
             const outputDiv = document.getElementById("output");
-            outputDiv.style.visibility = "visible";
-            outputDiv.innerText = "Processing...";
-            outputDiv.classList.remove('success', 'error');
+            const outputDiv2 = document.getElementById("output2");
+            const spinner = document.getElementById("spinner");
+
+            outputDiv.style.visibility = "hidden";
+            outputDiv2.style.display = "none";
+            spinner.style.display = "block";
 
             const inputField = document.getElementById("input_value");
             const input_value = inputField.value;
-
-            // Get CSRF token
             const csrfToken = getCsrfToken();
 
             fetch("/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken // Add CSRF token to headers
+                    "X-CSRFToken": csrfToken
                 },
                 body: JSON.stringify({ input_value })
             })
@@ -153,25 +267,52 @@
                 return response.json();
             })
             .then(data => {
+                spinner.style.display = "none";
+                outputDiv.style.visibility = "visible";
+                outputDiv2.style.display = "block";
+
                 if (data.output) {
-                    outputDiv.classList.add('success');
-                    outputDiv.innerHTML = `<strong>Output:</strong> ${data.output}`;
+                    outputDiv.className = 'success';
+                    outputDiv.innerHTML = `${data.output}`;
                 } else if (data.error) {
-                    outputDiv.classList.add('error');
+                    outputDiv.className = 'error';
                     outputDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
                 } else {
-                    outputDiv.classList.add('error');
+                    outputDiv.className = 'error';
                     outputDiv.innerHTML = `<strong>Error:</strong> Unknown error occurred`;
                 }
             })
             .catch(error => {
-                outputDiv.classList.add('error');
+                spinner.style.display = "none";
+                outputDiv.style.visibility = "visible";
+                outputDiv.className = 'error';
                 outputDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
                 console.error("Error:", error);
             });
         }
+
+        function startVoiceRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Voice recognition is not supported in this browser.");
+                return;
+            }
+
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = "en-US";
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById("input_value").value = transcript;
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Voice recognition error:", event);
+            };
+        }
     </script>
 </body>
 </html>
-
-
